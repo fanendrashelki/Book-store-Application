@@ -9,7 +9,7 @@ router.post("/add-favourite", authMiddleware, async (req, res) => {
     const userData = await User.findById(id);
     const bookExists = userData.favourites.includes(bookid);
     if (bookExists) {
-      return res.status(400).json({ message: "Book is alredy in favourite" });
+      return res.status(400).json({ message: "Book is already in favourite" });
     }
 
     await User.findByIdAndUpdate(id, { $push: { favourites: bookid } });
@@ -37,16 +37,15 @@ router.delete("/remove-favourite", authMiddleware, async (req, res) => {
 
 router.get("/get-favourite", authMiddleware, async (req, res) => {
   try {
-    const { id, bookid } = req.headers;
+    const { id } = req.headers;
     const userData = await User.findById(id).populate("favourites");
 
     const favouriteBook = userData.favourites;
-    console.log(favouriteBook);
-    if (!favouriteBook) {
+    if (!favouriteBook || favouriteBook.length === 0) {
       res.status(400).json({ message: "Book not found in favourite" });
     }
 
-    return res.json({ Status: "Sccess", data: favouriteBook });
+    return res.json({ Status: "success", data: favouriteBook });
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error });
   }
