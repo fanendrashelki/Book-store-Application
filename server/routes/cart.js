@@ -5,7 +5,8 @@ const authMiddleware = require("../middlewares/auth");
 
 router.post("/add-cart", authMiddleware, async (req, res) => {
   try {
-    const { id, bookid } = req.headers;
+    const { id, bookid } = req.body;
+
     const userData = await User.findById(id);
     const bookExists = userData.cart.includes(bookid);
     if (bookExists) {
@@ -23,14 +24,23 @@ router.post("/add-cart", authMiddleware, async (req, res) => {
 router.delete("/remove-cart", authMiddleware, async (req, res) => {
   try {
     const { id, bookid } = req.headers;
+
     const userData = await User.findById(id);
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
     const bookExists = userData.cart.includes(bookid);
     if (!bookExists) {
-      res.status(200).json({ message: "Book not found in cart" });
+      return res.status(404).json({ message: "Book not found in cart" });
     }
+
     await User.findByIdAndUpdate(id, { $pull: { cart: bookid } });
-    res.status(200).json({ message: "Book remove from cart" });
+
+    res.status(200).json({
+      message: "Book removed from cart",
+    });
   } catch (error) {
+    console.error("Error removing book from cart:", error);
     res.status(500).json({ message: "Internal server error", error });
   }
 });

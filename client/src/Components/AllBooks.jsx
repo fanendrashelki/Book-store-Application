@@ -3,7 +3,7 @@ import CartBox from "../Components/CartBox";
 import axios from "axios";
 const API = import.meta.env.VITE_API_URL;
 
-const BookCard = () => {
+const AllBooks = () => {
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
@@ -15,7 +15,7 @@ const BookCard = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get(`${API}/book-recent-list`, {
+      const response = await axios.get(`${API}/book-list`, {
         headers: { Authorization: `Bearer ${token}`, id: userId },
       });
       // console.log(response.data.data);
@@ -35,4 +35,4 @@ const BookCard = () => {
   );
 };
 
-export default BookCard;
+export default AllBooks;

@@ -19,10 +19,19 @@ const SignIn = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${API}/sign-in`, formData);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("userId", response.data.id);
-      toast.success(response.data.message || "Login successful!");
-      setTimeout(() => navigate("/"), 1000);
+      const { token, id, role, message } = response.data;
+
+      // Store user details
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", id);
+      localStorage.setItem("role", role);
+      setTimeout(() => {
+        if (role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/home");
+        }
+      }, 1000);
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Something went wrong. Try again!"

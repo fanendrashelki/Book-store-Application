@@ -98,7 +98,7 @@ const SignUp = () => {
         </form>
         <div className="mt-5">
           Already have an account?
-          <Link to="/sign-in" className="text-emerald-600">
+          <Link to="/" className="text-emerald-600">
             Sign In
           </Link>
         </div>

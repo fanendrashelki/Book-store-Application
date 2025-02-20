@@ -110,7 +110,7 @@ router.get("/book-list", authMiddleware, async (req, res) => {
 
 router.get("/book-recent-list", authMiddleware, async (req, res) => {
   try {
-    const bookList = await Book.find().sort({ createdAt: -1 }).limit(4);
+    const bookList = await Book.find().sort({ createdAt: -1 }).limit(5);
 
     return res.status(200).json({ status: "Success", data: bookList });
   } catch (error) {

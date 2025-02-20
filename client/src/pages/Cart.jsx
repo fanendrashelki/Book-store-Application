@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaTrash } from "react-icons/fa";
 
+import { toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
+import CartFavorites from "../Components/CartFavorites";
 const API = import.meta.env.VITE_API_URL;
 
 const Cart = () => {
@@ -23,6 +26,8 @@ const Cart = () => {
       if (response.data.cart) {
         setCartData(response.data.cart);
         calculateTotal(response.data.cart);
+        localStorage.setItem("cartCount", response.data.cart.length);
+        window.dispatchEvent(new Event("cartUpdated"));
       }
     } catch (error) {
       console.error("Error fetching cart data:", error);
@@ -36,7 +41,7 @@ const Cart = () => {
 
   const handleRemove = async (bookid) => {
     try {
-      await axios.delete(`${API}/remove-cart`, {
+      const response = await axios.delete(`${API}/remove-cart`, {
         headers: {
           Authorization: `Bearer ${token}`,
           id: userId,
@@ -47,6 +52,13 @@ const Cart = () => {
       const updatedCart = cartData.filter((item) => item._id !== bookid);
       setCartData(updatedCart);
       calculateTotal(updatedCart);
+
+      // Update cart count in localStorage
+      localStorage.setItem("cartCount", updatedCart.length);
+
+      // Dispatch event to notify Navbar
+      window.dispatchEvent(new Event("cartUpdated"));
+      toast.success(response.data.message);
     } catch (error) {
       console.error("Error removing item:", error);
     }
@@ -59,30 +71,11 @@ const Cart = () => {
       {cartData.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {cartData.map((book) => (
-            <div
+            <CartFavorites
               key={book._id}
-              className="border p-4 rounded-lg shadow-lg bg-white"
-            >
-              <img
-                src={
-                  book.url ||
-                  "https://dhmckee.com/wp-content/uploads/2018/11/defbookcover-min.jpg"
-                }
-                alt={book.title}
-                className="w-full h-60 object-cover rounded-lg"
-              />
-              <h2 className="text-lg font-semibold mt-2">{book.title}</h2>
-              <p className="text-gray-500">Price: ${book.price}</p>
-              <p className="text-gray-500">Quantity: {book.quantity}</p>
-              <div className="flex justify-between items-center mt-4">
-                <button
-                  className="bg-red-500 text-white px-3 py-1 rounded flex items-center hover:bg-red-600"
-                  onClick={() => handleRemove(book._id)}
-                >
-                  <FaTrash className="mr-2" /> Remove
-                </button>
-              </div>
-            </div>
+              book={book}
+              handleRemove={handleRemove}
+            />
           ))}
         </div>
       ) : (

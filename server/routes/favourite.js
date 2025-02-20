@@ -5,7 +5,7 @@ const authMiddleware = require("../middlewares/auth");
 
 router.post("/add-favourite", authMiddleware, async (req, res) => {
   try {
-    const { id, bookid } = req.headers;
+    const { id, bookid } = req.body;
     const userData = await User.findById(id);
     const bookExists = userData.favourites.includes(bookid);
     if (bookExists) {
@@ -22,7 +22,7 @@ router.post("/add-favourite", authMiddleware, async (req, res) => {
 
 router.delete("/remove-favourite", authMiddleware, async (req, res) => {
   try {
-    const { id, bookid } = req.headers;
+    const { id, bookid } = req.body;
     const userData = await User.findById(id);
     const bookExists = userData.favourites.includes(bookid);
     if (!bookExists) {
@@ -42,7 +42,7 @@ router.get("/get-favourite", authMiddleware, async (req, res) => {
 
     const favouriteBook = userData.favourites;
     if (!favouriteBook || favouriteBook.length === 0) {
-      res.status(400).json({ message: "Book not found in favourite" });
+      return res.status(400).json({ message: "Book not found in favourite" });
     }
 
     return res.json({ Status: "success", data: favouriteBook });

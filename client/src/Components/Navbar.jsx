@@ -3,6 +3,7 @@ import { IoBook } from "react-icons/io5";
 import { FaHeart, FaShoppingCart, FaUserCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import axios from "axios";
+
 const API = import.meta.env.VITE_API_URL;
 
 const Navbar = () => {
@@ -12,15 +13,31 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
+    const updateCartCount = () => {
+      fechCartCount();
+    };
+
+    // Fetch count on mount
     fechCartCount();
-  });
+
+    // Listen for cart updates
+    window.addEventListener("cartUpdated", updateCartCount);
+
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartCount);
+    };
+  }, []);
 
   const fechCartCount = async () => {
     try {
       const response = await axios.get(`${API}/get-cart`, {
         headers: { Authorization: `Bearer ${token} `, id: userId },
       });
+
       setCartCount(response.data.cart.length);
+
+      // Store in localStorage
+      localStorage.setItem("cartCount", response.data.cart.length);
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
@@ -29,7 +46,8 @@ const Navbar = () => {
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    navigate("/sign-in");
+    localStorage.removeItem("cartCount");
+    navigate("/");
   };
 
   return (
@@ -37,7 +55,7 @@ const Navbar = () => {
       <nav className="flex justify-between p-4 shadow-md bg-white">
         {/* Logo */}
         <div>
-          <Link to="/">
+          <Link to="/home">
             <IoBook className="text-emerald-600 text-4xl" />
           </Link>
         </div>
@@ -46,7 +64,7 @@ const Navbar = () => {
         <div>
           <ul className="flex items-center space-x-6">
             <li>
-              <Link to="/" className="hover:text-emerald-600">
+              <Link to="/home" className="hover:text-emerald-600">
                 Home
               </Link>
             </li>
